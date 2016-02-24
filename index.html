@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>2Look OLL Practice</title>
+        <meta name="description" content="A WebGL animated Rubik's cube by Michiel van der Blonk">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="static/main.css">
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="js/jquery.easing.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="js/gl-matrix-min.js"></script>
+        <script type="text/javascript" src="js/models.js"></script>
+        <script type="text/javascript" src="js/rubiks.js"></script>
+        <script id="fragmentShader" type="x-shader/x-fragment">
+            varying highp vec4 position;
+            varying highp vec3 normal;
+
+            uniform bool lighting;
+            uniform highp vec3 eyePosition;
+            uniform highp vec4 ambient;
+            uniform highp vec4 diffuse;
+            uniform highp vec4 specular;
+            uniform highp float shininess;
+
+            const highp vec4 lightPosition = vec4(-1.,1.,-1., 1);
+            const highp vec4 lightColor = vec4(.2,.2,.2,1);
+
+            void main(void) {
+                if (lighting) {
+                    highp vec3 position = position.xyz / position.w;
+                    highp vec3 eyeDirection = normalize(eyePosition - position);
+                    highp vec3 lightPosition = lightPosition.xyz / lightPosition.w;
+                    highp vec3 lightDirection = normalize(lightPosition - position);
+                    highp vec3 halfAngle = normalize(lightDirection + eyeDirection);
+                    highp vec4 diffuseTerm = diffuse * lightColor * max(dot(normal, lightDirection), 0.0);
+                    highp vec4 specularTerm = specular * lightColor * pow(max(dot(normal, halfAngle), 0.0), shininess);
+                    gl_FragColor = diffuseTerm + specularTerm + ambient;
+                } else {
+                    gl_FragColor = ambient;
+                }
+            }
+        </script>
+        <script id="vertexShader" type="x-shader/x-vertex">
+            attribute vec3 vertexPosition;
+            attribute vec3 vertexNormal;
+
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+            uniform mat3 normalMatrix;
+
+            varying vec4 position;
+            varying vec3 normal;
+
+            void main(void) {
+                position = modelViewMatrix * vec4(vertexPosition, 1.0);
+                gl_Position = projectionMatrix * position;
+                normal = normalize(normalMatrix * vertexNormal);
+            }
+       </script>
+    </head>
+    <body>
+
+
+	<div>
+		<div class="glube col-md-3">
+			<h2>2-Look OLL Practice</h2>
+			<div class="top-controls">
+				<button class="reset-cube btn btn-info btn-sm">Reset</button>
+				<div class="alg">
+					<label>Algorithm</label> 
+					<input class="algorithm form-control" placeholder="Algorithm" type="hidden" />
+				</div>
+				<button class="ran-scramble btn btn-info btn-sm">Scramble</button>
+			</div>
+				<canvas data-alg="" data-type="solver" data-stickers="OLL"></canvas>
+			<div>
+				Whole Cube:
+				<button class="y-alg btn btn-info btn-sm">y</button>
+				<button class="yp-alg btn btn-info btn-sm">y'</button>
+				<br />First Look:
+				<button class="opposite-alg btn btn-info btn-sm">Opposite</button>
+				<button class="adjacent-alg btn btn-info btn-sm">Adjacent</button>
+				<button class="none-alg btn btn-info btn-sm">None</button>
+				<br />Second Look:
+				<button class="sune-alg btn btn-info btn-sm">Sune</button>
+				<button class="anti-sune-alg btn btn-info btn-sm">Anti-Sune</button>
+				<button class="car-alg btn btn-info btn-sm">Car</button>
+				<button class="blinker-alg btn btn-info btn-sm">Blinker</button>
+				<button class="headlights-alg btn btn-info btn-sm">Headlights</button>
+				<button class="chameleon-alg btn btn-info btn-sm">Chameleon</button>
+				<button class="bowtie-alg btn btn-info btn-sm">Bowtie</button>
+				
+			</div>
+        </div>
+
+
+	</div>
+    </body>
+</html>
